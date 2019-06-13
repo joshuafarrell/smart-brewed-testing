@@ -4,7 +4,7 @@
 
 We needed a way to bridge our automated tests with manual testing that occurs through Gurock's TestRail.
 
-This setups a spring service that TestRail then talks to through a custom ui-script added to the test run dashboard. A
+This sets up a spring service that TestRail then talks to through a custom ui-script added to the test run dashboard. A
 user can mix together manual and automated tests to create a run, click a button and continue to work while this service
 runs the automated tests and updates the associated statuses in TestRail.
 
