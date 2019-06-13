@@ -2,8 +2,9 @@ package io.symbolik.utils;
 
 import com.saucelabs.common.SauceOnDemandAuthentication;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -21,8 +22,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class CustomDriver {
     private static final Logger LOGGER = Logger.getLogger(CustomDriver.class);
+    private static final String hubURI = "http://localhost:4444/wd/hub";
 
-    private CustomDriver(){}
+    private CustomDriver() {
+    }
 
     /**
      * Create a remote driver using Sauce Labs
@@ -39,7 +42,6 @@ public class CustomDriver {
 
         DesiredCapabilities capability = new DesiredCapabilities();
 
-        capability.setCapability(CapabilityType.PLATFORM, os);
         capability.setCapability(CapabilityType.BROWSER_NAME, browser);
         capability.setCapability(CapabilityType.VERSION, version);
         capability.setCapability("name", className);
@@ -70,7 +72,6 @@ public class CustomDriver {
 
         DesiredCapabilities capability = new DesiredCapabilities();
 
-        capability.setCapability(CapabilityType.PLATFORM, os);
         capability.setCapability(CapabilityType.BROWSER_NAME, browser);
         capability.setCapability(CapabilityType.VERSION, version);
         capability.setCapability("name", className);
@@ -89,46 +90,50 @@ public class CustomDriver {
     }
 
     /**
-     * Create a local driver on a local instance of symbolik grid
+     * Create a local driver locally or on a docker instance of symbolik grid
      *
      * @param browser
      * @return WebDriver
      */
     public static WebDriver createLocalDriver(String browser) {
         WebDriver driver = null;
-        DesiredCapabilities capability = new DesiredCapabilities();
-
-        if ("firefox".equals(browser)) {
-            FirefoxProfile firefoxProfile = new FirefoxProfile();
-
-            firefoxProfile.setPreference("browser.download.folderList", 2);
-            firefoxProfile.setPreference("browser.download.manager.showWhenStarting", false);
-
-            //disable automatic adobe-like viewers
-            firefoxProfile.setPreference("pdfjs.disabled", true);
-            firefoxProfile.setPreference("plugin.scan.plid.all", false);
-            firefoxProfile.setPreference("plugin.scan.Acrobat", "99.0");
-
-            firefoxProfile.setPreference("browser.download.dir", "src/resources/");
-            firefoxProfile.setPreference("browser.helperApps.alwaysAsk.force", false);
-            firefoxProfile.setPreference("browser.helperApps.neverAsk.saveToDisk", "application/pdf,application/Zip");
-            //this will stop a long page load, but still be bound by the implicit wait below
-            firefoxProfile.setPreference("network.http.connection-timeout", 60);
-
-            capability = DesiredCapabilities.firefox();
-            capability.setCapability(FirefoxDriver.PROFILE, firefoxProfile);
-
-        } else if ("chrome".equals(browser)) {
-            capability = DesiredCapabilities.chrome();
-            capability.setCapability("chrome.binary", "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe");
-        } else if ("iexplorer".equals(browser)) {
-            capability = DesiredCapabilities.internetExplorer();
-
-        }
 
         try {
-            driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), capability);
-            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+            if ("firefox".equals(browser)) {
+                FirefoxOptions firefoxOptions = new FirefoxOptions();
+
+                firefoxOptions.addPreference("browser.download.folderList", 2);
+                firefoxOptions.addPreference("browser.download.manager.showWhenStarting", false);
+
+                //disable automatic adobe-like viewers
+                firefoxOptions.addPreference("pdfjs.disabled", true);
+                firefoxOptions.addPreference("plugin.scan.plid.all", false);
+                firefoxOptions.addPreference("plugin.scan.Acrobat", "99.0");
+
+                firefoxOptions.addPreference("browser.download.dir", "src/resources/");
+                firefoxOptions.addPreference("browser.helperApps.alwaysAsk.force", false);
+                firefoxOptions.addPreference("browser.helperApps.neverAsk.saveToDisk", "application/pdf,application/Zip");
+                //this will stop a long page load, but still be bound by the implicit wait below
+                firefoxOptions.addPreference("network.http.connection-timeout", 60);
+
+                driver = new RemoteWebDriver(new URL(hubURI), firefoxOptions);
+                driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+            } else if ("chrome".equals(browser)) {
+                ChromeOptions chromeOptions = new ChromeOptions();
+
+                chromeOptions.addArguments("--ignore-certificate-errors");
+                chromeOptions.addArguments("--allow-running-insecure-content");
+                chromeOptions.addArguments("--disable-extensions");
+                chromeOptions.addArguments("--start-maximized");
+
+                driver = new RemoteWebDriver(new URL(hubURI), chromeOptions);
+                driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+            } else if ("edge".equals(browser)) {
+                EdgeOptions edgeOptions = new EdgeOptions();
+
+                driver = new RemoteWebDriver(new URL(hubURI), edgeOptions);
+                driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+            }
         } catch (MalformedURLException e) {
             LOGGER.info(e);
         }

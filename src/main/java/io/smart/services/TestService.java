@@ -6,6 +6,7 @@ import io.symbolik.utils.SmartBrewedTestListener;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.stereotype.Service;
+import org.testng.ITestNGListener;
 import org.testng.TestNG;
 import org.testng.log4testng.Logger;
 import org.testng.xml.XmlClass;
@@ -47,7 +48,7 @@ public class TestService {
         // Lets iterate through the tests, capture the id and add the test to the suite
         for (int i = 0; i < response.size(); i++) {
             final JSONObject test = (JSONObject) response.get(i);
-            if(Integer.parseInt(test.get("custom_automation_type").toString()) == 2) {
+            if (Integer.parseInt(test.get("custom_automation_type").toString()) == 2) {
                 final List<XmlSuite> suites = new ArrayList<>();
                 final XmlSuite suite = new XmlSuite();
                 final Map<String, String> params = new HashMap<>();
@@ -58,11 +59,9 @@ public class TestService {
                 suite.setName(suiteName);
 
                 params.put("local", "true");
-                params.put("browser", "firefox");
+                params.put("browser", "chrome");
 
                 suite.setParameters(params);
-                System.out.println(response.get(i));
-
 
                 XmlClass xmlClass = new XmlClass((String) test.get("custom_package"));
 
@@ -75,8 +74,6 @@ public class TestService {
 
                 testNg.setXmlSuites(suites);
 
-                System.out.println(test.get("id") + ": " + test.get("title"));
-
                 SmartBrewedTestListener listener = new SmartBrewedTestListener();
 
                 listener.setSuiteId(String.valueOf(runId));
@@ -84,17 +81,11 @@ public class TestService {
                 listener.setTestId(String.valueOf(test.get("id")));
                 listener.setClient(CLIENT);
 
-                testNg.addListener(listener);
+                testNg.addListener((ITestNGListener) listener);
 
                 testNg.run();
             }
         }
-
-
-
-
-
-
 
 
     }

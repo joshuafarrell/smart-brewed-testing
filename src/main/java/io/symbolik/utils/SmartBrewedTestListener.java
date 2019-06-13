@@ -21,7 +21,7 @@ public class SmartBrewedTestListener extends TestListenerAdapter {
     private String comment = "";
 
     @Override
-    public void onConfigurationFailure(ITestResult itr){
+    public void onConfigurationFailure(ITestResult itr) {
         System.out.println(itr.getThrowable().getMessage());
     }
 
@@ -42,7 +42,7 @@ public class SmartBrewedTestListener extends TestListenerAdapter {
 
     @Override
     public void onTestSuccess(final ITestResult testResult) {
-        results.put(testResult.getName(), "Failure");
+        results.put(testResult.getName(), "Success");
     }
 
     @Override
@@ -53,7 +53,7 @@ public class SmartBrewedTestListener extends TestListenerAdapter {
         for (Map.Entry<String, Object> result : results.entrySet()) {
             comment += result.getKey() + ": " + result.getValue() + "\n";
 
-            if(result.getValue().toString().contains("Failure") && status != 5){
+            if (result.getValue().toString().contains("Failure") && status != 5) {
                 status = 5;
             }
         }

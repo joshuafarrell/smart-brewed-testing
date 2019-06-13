@@ -1,26 +1,36 @@
 package io.symbolik.tests.login;
 
-import io.symbolik.pages.HomePage;
+import io.symbolik.pages.LoginPage;
+import io.symbolik.pages.MainPage;
 import io.symbolik.tests.SuperTest;
+import io.symbolik.utils.Tools;
 import org.openqa.selenium.support.PageFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import io.symbolik.utils.Tools;
 
 public class LoginTest extends SuperTest {
-    private HomePage homePage;
+    private LoginPage loginPage;
+    private MainPage mainPage;
 
     @BeforeClass()
     public void initTest() {
-        homePage = PageFactory.initElements(driver, HomePage.class);
-        homePage.open("https://charting.qa3.demark.io");
+        loginPage = PageFactory.initElements(driver, LoginPage.class);
+        loginPage.open("https://charting.qa3.demark.io");
     }
 
     @Test(groups = {"checkin"})
-    public void checkSignInButton() throws InterruptedException{
-        Thread.sleep(60000);
+    public void login() throws InterruptedException {
+        mainPage = loginPage.login("qatester", "DeMark123");
+
+        Assert.assertTrue(mainPage.getDivSearchIcon().isDisplayed(), "Did not find the search icon");
+
+        for (int i = 0; i < 1000; i++) {
+            driver.navigate().refresh();
+
+            Thread.sleep(10000);
+        }
+
         Tools.captureBrowserScreenshot(driver, "test", "./test-output/selenium_screenshots/");
-        Assert.assertTrue(homePage.elementHasContent(homePage.getBtnSubmit()), "Sign in button not found.");
     }
 }

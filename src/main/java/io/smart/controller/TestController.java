@@ -29,12 +29,10 @@ public class TestController {
     @RequestMapping(method = RequestMethod.GET, value = "/{runId}/{suiteName}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public void getByRunId(@PathVariable("runId")
-                           @ApiPathParam(name = "ID", description = "Identifier of Test Run", format = "\\d+")
-                           final long runId,
+                           @ApiPathParam(name = "ID", description = "Identifier of Test Run", format = "\\d+") final long runId,
                            @PathVariable("suiteName")
                            @ApiPathParam(name = "Suite Name", description = "Name of the test suite",
-                                   format = "^\\w{1,255}$")
-                           final String suiteName) {
+                                   format = "^\\w{1,255}$") final String suiteName) {
         testService.runById(runId, suiteName);
     }
 

@@ -21,11 +21,10 @@ import java.net.URL;
 
 public class APIClient {
     private static final Logger LOGGER = Logger.getLogger(APIClient.class);
-
+    private static final String FORMAT = "UTF-8";
     private String mUser;
     private String mPassword;
     private String mUrl;
-    private static final String FORMAT = "UTF-8";
 
     public APIClient(String baseUrl) {
         if (!baseUrl.endsWith("/")) {
