@@ -11,25 +11,35 @@ import org.testng.annotations.Test;
 
 public class LoginTest extends SuperTest {
     private LoginPage loginPage;
-    private MainPage mainPage;
 
     @BeforeClass()
     public void initTest() {
         loginPage = PageFactory.initElements(driver, LoginPage.class);
-        loginPage.open("https://charting.qa3.demark.io");
+        loginPage.open("https://symbolik.com");
     }
 
-    @Test(groups = {"checkin"})
-    public void login() throws InterruptedException {
-        mainPage = loginPage.login("qatester", "DeMark123");
+
+    @Test(priority = 1,groups = {"checkin"})
+    public void loginWrongPassword(){
+        loginPage = loginPage.loginWrongInfo("qatester", "wrong");
+
+        Assert.assertTrue(loginPage.getInputPassword().isDisplayed(), "Did not find the password input");
+        Tools.captureBrowserScreenshot(driver, "WrongPassword", "./test-output/selenium_screenshots/");
+    }
+
+    @Test(priority = 1, groups = {"checkin"})
+    public void loginWrongUsername(){
+        loginPage = loginPage.loginWrongInfo("DoesNotExist", "DeMark123");
+
+        Assert.assertTrue(loginPage.getInputPassword().isDisplayed(), "Did not find the password input");
+        Tools.captureBrowserScreenshot(driver, "WrongUsername", "./test-output/selenium_screenshots/");
+    }
+
+    @Test(priority = 2, groups = {"checkin"})
+    public void login() {
+        MainPage mainPage = loginPage.login("qatester", "DeMark123");
 
         Assert.assertTrue(mainPage.getDivSearchIcon().isDisplayed(), "Did not find the search icon");
-
-        for (int i = 0; i < 1000; i++) {
-            driver.navigate().refresh();
-
-            Thread.sleep(10000);
-        }
 
         Tools.captureBrowserScreenshot(driver, "test", "./test-output/selenium_screenshots/");
     }

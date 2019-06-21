@@ -3,17 +3,31 @@ package io.symbolik.utils;
 import io.gurock.testrail.APIClient;
 import io.gurock.testrail.APIException;
 import lombok.Data;
-import org.testng.ITestContext;
-import org.testng.ITestResult;
-import org.testng.TestListenerAdapter;
+import lombok.EqualsAndHashCode;
+import org.testng.*;
 
+import javax.validation.constraints.AssertFalse;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
+/**
+ * Custom listener to send updates to testrail based on the results of provided tests.
+ *
+ * @author joshuatfarrell
+ * @version 1.0
+ */
 @Data
-public class SmartBrewedTestListener extends TestListenerAdapter {
+@EqualsAndHashCode(callSuper=false)
+public class SmartBrewedTestListener extends TestListenerAdapter implements ISuiteListener {
     private final Map<String, Object> results = new HashMap<>();
+    final Map<String, Object> data = new HashMap<>();
+    private int totalElapsedTime = 0;
     private String suiteId;
     private String testId;
     private String testName;
@@ -43,11 +57,39 @@ public class SmartBrewedTestListener extends TestListenerAdapter {
     @Override
     public void onTestSuccess(final ITestResult testResult) {
         results.put(testResult.getName(), "Success");
+
+        System.out.println("Duration: " + ((testResult.getEndMillis() / 1000) - (testResult.getStartMillis() / 1000)));
+        results.put("elapsedTime", ((testResult.getEndMillis() / 1000) - (testResult.getStartMillis() / 1000)) +
+                Integer.parseInt(results.getOrDefault("elapsedTime", 0).toString()));
     }
 
+    /**
+     * This will run once at the start a the test suite
+     *
+     * @param suite
+     */
+    @Override
+    public void onStart(ISuite suite) {
+        System.out.println("Suite started");
+    }
+
+    /**
+     * This will run every time a test is started
+     *
+     * @param testContext
+     */
+    @Override
+    public void onStart(final ITestContext testContext){
+        results.clear();
+    }
+
+    /**
+     * This will run every time a test is finished
+     * @param testContext
+     */
     @Override
     public void onFinish(final ITestContext testContext) {
-        final Map<String, Object> data = new HashMap<>();
+        System.out.println("I'm in the onFinish");
         int status = 1;
 
         for (Map.Entry<String, Object> result : results.entrySet()) {
@@ -61,7 +103,7 @@ public class SmartBrewedTestListener extends TestListenerAdapter {
         data.put("test_id", testId);
         data.put("status_id", status);
         data.put("comment", comment);
-        data.put("elapsed", "30s");
+        totalElapsedTime += Integer.parseInt(results.get("elapsedTime").toString());
 
         try {
             client.sendPost("add_result/" + testId, data);
@@ -72,5 +114,17 @@ public class SmartBrewedTestListener extends TestListenerAdapter {
         }
 
         System.out.println("Done");
+    }
+
+    /**
+     * This will run once the entire suite is finished and then send the results back to TestRail
+     *
+     * @param suite
+     */
+    @Override
+    public void onFinish(final ISuite suite) {
+        System.out.println("Suite finished");
+
+        data.put("elapsed", totalElapsedTime + "s");
     }
 }

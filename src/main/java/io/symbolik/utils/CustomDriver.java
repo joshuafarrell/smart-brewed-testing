@@ -99,7 +99,21 @@ public class CustomDriver {
         WebDriver driver = null;
 
         try {
-            if ("firefox".equals(browser)) {
+            if ("edge".equals(browser)) {
+                EdgeOptions edgeOptions = new EdgeOptions();
+
+                driver = new RemoteWebDriver(new URL(hubURI), edgeOptions);
+            } else if ("chrome".equals(browser)) {
+                ChromeOptions chromeOptions = new ChromeOptions();
+
+                chromeOptions.addArguments("--ignore-certificate-errors");
+                chromeOptions.addArguments("--allow-running-insecure-content");
+                chromeOptions.addArguments("--disable-extensions");
+                chromeOptions.addArguments("--start-maximized");
+
+                driver = new RemoteWebDriver(new URL(hubURI), chromeOptions);
+            } else {
+                // Default to firefox if nothing matches
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
 
                 firefoxOptions.addPreference("browser.download.folderList", 2);
@@ -117,23 +131,9 @@ public class CustomDriver {
                 firefoxOptions.addPreference("network.http.connection-timeout", 60);
 
                 driver = new RemoteWebDriver(new URL(hubURI), firefoxOptions);
-                driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-            } else if ("chrome".equals(browser)) {
-                ChromeOptions chromeOptions = new ChromeOptions();
-
-                chromeOptions.addArguments("--ignore-certificate-errors");
-                chromeOptions.addArguments("--allow-running-insecure-content");
-                chromeOptions.addArguments("--disable-extensions");
-                chromeOptions.addArguments("--start-maximized");
-
-                driver = new RemoteWebDriver(new URL(hubURI), chromeOptions);
-                driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-            } else if ("edge".equals(browser)) {
-                EdgeOptions edgeOptions = new EdgeOptions();
-
-                driver = new RemoteWebDriver(new URL(hubURI), edgeOptions);
-                driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
             }
+
+            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         } catch (MalformedURLException e) {
             LOGGER.info(e);
         }

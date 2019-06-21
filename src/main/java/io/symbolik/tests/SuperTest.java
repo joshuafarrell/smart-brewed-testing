@@ -43,8 +43,8 @@ public class SuperTest implements SauceOnDemandSessionIdProvider, SauceOnDemandA
         name = context.getName();
 
         if (local) {
-            LOGGER.info("Creating a local driver.");
-
+            //LOGGER.info("Creating a local" + browser + " driver.");
+            System.out.println("Creating a local " + browser + " driver.");
             driver = CustomDriver.createLocalDriver(browser);
         } else {
             LOGGER.info("Creating a SauceLabs driver");
