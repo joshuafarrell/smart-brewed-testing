@@ -3,10 +3,13 @@ package io.symbolik.tests;
 import com.saucelabs.common.SauceOnDemandAuthentication;
 import com.saucelabs.common.SauceOnDemandSessionIdProvider;
 import com.saucelabs.testng.SauceOnDemandAuthenticationProvider;
+import io.symbolik.pages.LoginPage;
+import io.symbolik.pages.MainPage;
 import io.symbolik.utils.CustomDriver;
 import io.symbolik.utils.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.PageFactory;
 import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
@@ -43,8 +46,7 @@ public class SuperTest implements SauceOnDemandSessionIdProvider, SauceOnDemandA
         name = context.getName();
 
         if (local) {
-            //LOGGER.info("Creating a local" + browser + " driver.");
-            System.out.println("Creating a local " + browser + " driver.");
+            LOGGER.info("Creating a local" + browser + " driver.");
             driver = CustomDriver.createLocalDriver(browser);
         } else {
             LOGGER.info("Creating a SauceLabs driver");
@@ -61,6 +63,13 @@ public class SuperTest implements SauceOnDemandSessionIdProvider, SauceOnDemandA
         LOGGER.info(name + " - Driver: " + driver.hashCode());
 
         driver.manage().window().maximize();
+
+        if(!context.getName().equals("Login using invalid credentials")){
+            LoginPage loginPage = PageFactory.initElements(driver, LoginPage.class);
+            loginPage.open("https://symbolik.com");
+
+            loginPage.login("jfarrell", "DeMark12345");
+        }
 
         LOGGER.info("       End BeforeClass");
     }

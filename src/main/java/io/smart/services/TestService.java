@@ -35,7 +35,7 @@ public class TestService {
 
 
     public void runById(final long runId, final String suiteName) {
-        String[] browserList = {"firefox", "chrome"};
+        String browser = "firefox";
         final List<XmlSuite> suites = new ArrayList<>();
         final TestNG testNg = new TestNG();
         final XmlSuite suite = new XmlSuite();
@@ -45,11 +45,14 @@ public class TestService {
         CLIENT.setUser(user);
         CLIENT.setPassword(password);
 
-        JSONArray response = new JSONArray();
-
+        JSONArray testsResponse = new JSONArray();
+        JSONObject testRunResponse = new JSONObject();
         // Get tests that have status: Untested, Retest, Failed; and are related to the testrail runId
         try {
-            response = (JSONArray) CLIENT.sendGet("get_tests/" + runId + "&custom_automation_type=2");
+            testsResponse = (JSONArray) CLIENT.sendGet("get_tests/" + runId + "&status_id=1,2,3,4,5");
+            testRunResponse = (JSONObject) CLIENT.sendGet("get_run/" + runId);
+
+            browser = testRunResponse.get("config").toString().toLowerCase();
         } catch (IOException | APIException e) {
             LOGGER.info(e);
         }
@@ -57,33 +60,30 @@ public class TestService {
         suite.setName(suiteName);
         suite.setFileName(suiteName);
 
-        for (String browser : browserList) {
-            Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>();
 
-            params.put("local", "true");
-            params.put("browser", browser);
+        params.put("local", "true");
+        params.put("browser", browser);
 
-            // Lets iterate through the tests, capture the id and add the test to the suite
-            for (int i = 0; i < response.size(); i++) {
-                List<XmlClass> classes = new ArrayList<>();
-                final JSONObject test = (JSONObject) response.get(i);
+        // Lets iterate through the tests, capture the id and add the test to the suite
+        for (int i = 0; i < testsResponse.size(); i++) {
+            List<XmlClass> classes = new ArrayList<>();
+            final JSONObject test = (JSONObject) testsResponse.get(i);
 
-                if (Integer.parseInt(test.get("custom_automation_type").toString()) == 2) {
-                    XmlTest xmlTest = new XmlTest(suite);
-                    xmlTest.setParameters(params);
+            if (Integer.parseInt(test.get("custom_automation_type").toString()) == 2) {
+                XmlTest xmlTest = new XmlTest(suite);
+                xmlTest.setParameters(params);
 
-                    XmlClass xmlClass = new XmlClass((String) test.get("custom_package"));
+                XmlClass xmlClass = new XmlClass((String) test.get("custom_package"));
 
-                    xmlClass.setName("LoginTest_" + browser);
-                    xmlClass.setParameters(params);
-                    classes.add(xmlClass);
+                xmlClass.setName((String) test.get("custom_package"));
+                classes.add(xmlClass);
 
-                    xmlTest.setName(browser);
-                    xmlTest.setXmlClasses(classes);
+                xmlTest.setName((String) test.get("title"));
+                xmlTest.setXmlClasses(classes);
 
-                    listener.setTestName((String) test.get("title"));
-                    listener.setTestId(String.valueOf(test.get("id")));
-                }
+                listener.setTestName((String) test.get("title"));
+                listener.setTestId(String.valueOf(test.get("id")));
             }
         }
 

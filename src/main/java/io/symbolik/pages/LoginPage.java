@@ -7,7 +7,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 /**
- * Elements and actions that appear on www.blogher.com
+ * Elements and actions that appear on the login page
  *
  * @author Joshua.Farrell
  * @version 1.0

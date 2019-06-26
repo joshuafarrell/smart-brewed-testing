@@ -43,6 +43,7 @@ public class SmartBrewedTestListener extends TestListenerAdapter implements ISui
     public void onTestFailure(final ITestResult testResult) {
         String[] message = testResult.getThrowable().getMessage().split("\n");
         System.out.println(message[0]);
+
         results.put(testResult.getName(), "Failure - " + message[0]);
     }
 
@@ -58,7 +59,6 @@ public class SmartBrewedTestListener extends TestListenerAdapter implements ISui
     public void onTestSuccess(final ITestResult testResult) {
         results.put(testResult.getName(), "Success");
 
-        System.out.println("Duration: " + ((testResult.getEndMillis() / 1000) - (testResult.getStartMillis() / 1000)));
         results.put("elapsedTime", ((testResult.getEndMillis() / 1000) - (testResult.getStartMillis() / 1000)) +
                 Integer.parseInt(results.getOrDefault("elapsedTime", 0).toString()));
     }
@@ -89,7 +89,6 @@ public class SmartBrewedTestListener extends TestListenerAdapter implements ISui
      */
     @Override
     public void onFinish(final ITestContext testContext) {
-        System.out.println("I'm in the onFinish");
         int status = 1;
 
         for (Map.Entry<String, Object> result : results.entrySet()) {
@@ -124,7 +123,5 @@ public class SmartBrewedTestListener extends TestListenerAdapter implements ISui
     @Override
     public void onFinish(final ISuite suite) {
         System.out.println("Suite finished");
-
-        data.put("elapsed", totalElapsedTime + "s");
     }
 }
