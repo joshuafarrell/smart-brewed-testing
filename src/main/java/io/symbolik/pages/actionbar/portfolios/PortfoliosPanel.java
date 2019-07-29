@@ -1,4 +1,4 @@
-package io.symbolik.pages.right;
+package io.symbolik.pages.right.portfolios;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package io.symbolik.pages.right;
+package io.symbolik.pages.right.scans;
 
 import lombok.Data;
 import org.openqa.selenium.WebElement;
